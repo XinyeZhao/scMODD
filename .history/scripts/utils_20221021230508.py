@@ -6,7 +6,8 @@ from sklearn.metrics import auc
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import roc_curve
 import warnings
-
+import pandas as pd
+import os
 warnings.filterwarnings("ignore")
 plt.style.use('seaborn-white')
 
@@ -38,7 +39,6 @@ def roc_pr_plot(y_label, y_pre ,path=None, title=None):
     ax2.set_title('PR Curve - {}'.format(title))
     ax2.legend(loc="center right")
     ax2.plot((0, 1), (1, 0), transform=ax2.transAxes, ls='-',c='b', lw=0.5)
-    plt.show()
     if path:
         fig.savefig(path)
 def umap_preproc(matrix):
@@ -86,6 +86,6 @@ def evaluate_scMODD(ground_truth, scMODD_results, PLOT=False):
     fpr, tpr, thersholds_roc = roc_curve(y_label, y_pre, pos_label=1)
     pr_auc = auc(recall, precision)
     roc_auc = auc(fpr, tpr)
-    print('AUROC: {}, AUPRC: {}'.format(roc_auc, pr_auc))
+    print('AUROC: {}', 'AUPRC: {}'.format(roc_auc, pr_auc))
     if PLOT:
         roc_pr_plot(y_label, y_pre)

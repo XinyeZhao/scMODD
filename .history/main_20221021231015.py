@@ -1,4 +1,6 @@
 # In[]
+from operator import index
+from sympy import root
 from scripts.scMODD import scMODD
 import pandas as pd
 from scripts.utils import *

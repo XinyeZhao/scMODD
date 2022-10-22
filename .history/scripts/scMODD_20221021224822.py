@@ -40,7 +40,6 @@ def scMODD(file_name, root_dir, save_path, this_resolution=0.8, model = 'NB', ):
         nb_sgl_param_dict[this_ct] = [all_miu, all_var, all_theta]
 
     # pre_compute dbl theta and miu
-    print('COMPUTING USING {} MODEL'.format(model))
     doublet_ct_lst = None
     nb_dbl_param_dict = {}
     artificial_dbl_clt = np.array([])
@@ -52,61 +51,32 @@ def scMODD(file_name, root_dir, save_path, this_resolution=0.8, model = 'NB', ):
             artificial_dbl_clt = artifitial_cmb_mtx
         else:
             artificial_dbl_clt = np.vstack((artificial_dbl_clt, artifitial_cmb_mtx))
-        if model == 'NB':
-            cmb_miu, cmb_var, cmb_theta = NB_pre(artifitial_cmb_mtx)
-            dbl_type = (ct1+'+'+ct2) if ((ct1) < (ct2)) else (ct2+'+'+ct1)
-            nb_dbl_param_dict[dbl_type] = [cmb_miu, cmb_var, cmb_theta]
-        elif model == 'ZINB':
-            cmb_miu, cmb_theta, cmb_pi = ZINB_pre(artifitial_cmb_mtx)
-            dbl_type = (ct1+'+'+ct2) if ((ct1) < (ct2)) else (ct2+'+'+ct1)
-            nb_dbl_param_dict[dbl_type] = [cmb_miu, cmb_theta, cmb_pi]  
-        # cmb_miu, cmb_var, cmb_theta = NB_pre(artifitial_cmb_mtx)
-        # dbl_type = (ct1+'+'+ct2) if ((ct1) < (ct2)) else (ct2+'+'+ct1)
-        # nb_dbl_param_dict[dbl_type] = [cmb_miu, cmb_var, cmb_theta]
+        cmb_miu, cmb_var, cmb_theta = NB_pre(artifitial_cmb_mtx)
+        dbl_type = (ct1+'+'+ct2) if ((ct1) < (ct2)) else (ct2+'+'+ct1)
+        nb_dbl_param_dict[dbl_type] = [cmb_miu, cmb_var, cmb_theta]
 
     scores_df_fast = pd.DataFrame(index=range(matrix.shape[0]))
     scores_artificial_dbl = pd.DataFrame(index=range(artificial_dbl_clt.shape[0]))
 
     for sgl, sgl_param in nb_sgl_param_dict.items():
-        if model == 'NB':
-            miu, var, theta = sgl_param
-            this_score_all = NB_model(matrix, theta, miu)
-            this_score =  np.mean(this_score_all, axis = 1)
-            scores_df_fast[sgl] = this_score
+        miu, var, theta = sgl_param
+        this_score_all = NB_model(matrix, theta, miu)
+        this_score =  np.mean(this_score_all, axis = 1)
+        scores_df_fast[sgl] = this_score
 
-            this_score_all_artificial = NB_model(artificial_dbl_clt, theta, miu)
-            this_score_artificial =  np.mean(this_score_all_artificial, axis = 1)
-            scores_artificial_dbl[sgl] = this_score_artificial
-        elif model == 'ZINB':
-            miu, theta, pi = sgl_param
-            this_score_all = ZINB_model(matrix, theta, miu, pi)
-            this_score =  np.mean(this_score_all, axis = 1)
-            scores_df_fast[sgl] = this_score
-
-            this_score_all_artificial = ZINB_model(artificial_dbl_clt, theta, miu, pi)
-            this_score_artificial =  np.mean(this_score_all_artificial, axis = 1)
-            scores_artificial_dbl[sgl] = this_score_artificial
+        this_score_all_artificial = NB_model(artificial_dbl_clt, theta, miu)
+        this_score_artificial =  np.mean(this_score_all_artificial, axis = 1)
+        scores_artificial_dbl[sgl] = this_score_artificial
 
     for dbl, dbl_param in nb_dbl_param_dict.items():
-        if model == 'NB':
-            dbl_miu, dbl_var, dbl_theta = dbl_param
-            this_score_all = (NB_model(matrix, dbl_theta, dbl_miu))
-            this_score = np.mean(this_score_all, axis = 1)
-            scores_df_fast[dbl] = this_score
+        dbl_miu, dbl_var, dbl_theta = dbl_param
+        this_score_all = (NB_model(matrix, dbl_theta, dbl_miu))
+        this_score = np.mean(this_score_all, axis = 1)
+        scores_df_fast[dbl] = this_score
 
-            this_score_all_artificial = (NB_model(artificial_dbl_clt, dbl_theta, dbl_miu))
-            this_score_artificial = np.mean(this_score_all_artificial, axis = 1)
-            scores_artificial_dbl[dbl] = this_score_artificial
-        elif model == 'ZINB':
-            dbl_miu, dbl_theta, dbl_pi = dbl_param
-            this_score_all = ZINB_model(matrix, dbl_theta, dbl_miu, dbl_pi)
-            this_score = np.mean(this_score_all, axis = 1)
-            scores_df_fast[dbl] = this_score
-
-            this_score_all_artificial = ZINB_model(artificial_dbl_clt, dbl_theta, dbl_miu, dbl_pi)
-            this_score_artificial = np.mean(this_score_all_artificial, axis = 1)
-            scores_artificial_dbl[dbl] = this_score_artificial
-
+        this_score_all_artificial = (NB_model(artificial_dbl_clt, dbl_theta, dbl_miu))
+        this_score_artificial = np.mean(this_score_all_artificial, axis = 1)
+        scores_artificial_dbl[dbl] = this_score_artificial
 
     combined_mtx = pd.concat((scores_df_fast, scores_artificial_dbl), axis=0)
     y_lables = [0]*scores_df_fast.shape[0]+[1]*scores_artificial_dbl.shape[0]

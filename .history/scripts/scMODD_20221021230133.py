@@ -40,7 +40,6 @@ def scMODD(file_name, root_dir, save_path, this_resolution=0.8, model = 'NB', ):
         nb_sgl_param_dict[this_ct] = [all_miu, all_var, all_theta]
 
     # pre_compute dbl theta and miu
-    print('COMPUTING USING {} MODEL'.format(model))
     doublet_ct_lst = None
     nb_dbl_param_dict = {}
     artificial_dbl_clt = np.array([])
